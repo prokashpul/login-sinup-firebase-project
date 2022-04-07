@@ -1,9 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
+import app from "../../firebase.init";
 
+const auth = getAuth(app);
 const RegPage = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const pageReloadHandel = (e) => {
     e.preventDefault();
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((result) => {
+        const user = result.user;
+        setEmail("");
+        setPassword("");
+        userProfileUpdate();
+        emailVerify();
+        console.log(user);
+      })
+      .catch((error) => console.log(error));
+  };
+  const handelRegName = (e) => {
+    setName(e.target.value);
+  };
+  const handelRegEmail = (e) => {
+    setEmail(e.target.value);
+  };
+  const handelRegPassword = (e) => {
+    setPassword(e.target.value);
+  };
+  const userProfileUpdate = () => {
+    updateProfile(auth.currentUser, {
+      displayName: name,
+    })
+      .then(() => {
+        console.log(name);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const emailVerify = () => {
+    sendEmailVerification(auth.currentUser).then(() => {
+      console.log("email verify send");
+    });
   };
   return (
     <div className=" flex flex-col h-[100vh] items-center justify-center">
@@ -20,6 +66,7 @@ const RegPage = () => {
               name="name"
               id="name"
               placeholder="Full Name"
+              onBlur={handelRegName}
             />
           </div>
           <div className="mb-5">
@@ -30,6 +77,7 @@ const RegPage = () => {
               name="email"
               id="email"
               placeholder="Email"
+              onBlur={handelRegEmail}
             />
           </div>
           <div className="mb-5">
@@ -40,6 +88,7 @@ const RegPage = () => {
               name="password"
               id="password"
               placeholder="Password"
+              onBlur={handelRegPassword}
             />
           </div>
           <div className="mb-5">
